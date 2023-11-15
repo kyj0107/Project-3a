@@ -22,7 +22,7 @@
     <hr>
     <div class="white-box">
         <h1><center>Stock Data Visualizer</center></h1>
-        <form>
+        <form method="post">
             <label for="symbol">Choose Symbol: </label>
             <select name="symbol" method="GET" action="/" >
                 {% for symbol in symbols %}
@@ -33,7 +33,7 @@
             <label for="chart_type">Choose Chart Type: </label>
             <select name="chart_type">
                 <option value="bar">1. Bar</option>
-                <option value="line">2. Bar</option>
+                <option value="line">2. Line</option>
             </select>
             <br>
             <label for="time_series">Choose Time Series: </label>
