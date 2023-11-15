@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            background-color: rgb(212, 235, 255)
+        }
+        .white-box {
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        {% for message in get_flashed_messages() %}
+            <div class="alert">{{ message }}</div>
+        {% endfor %}
+
+        {% block content %} {% endblock %}
+    </div>
+    <hr>
+    <div class="white-box">
+        <h1><center>Stock Data Visualizer</center></h1>
+        <form>
+            <label for="symbol">Choose Symbol: </label>
+            <select name="symbol" method="GET" action="/" >
+                {% for symbol in symbols %}
+                <option value="{{ symbol }}">{{ symbol }}</option>
+                {% endfor %}
+            </select>
+            <br>
+            <label for="chart_type">Choose Chart Type: </label>
+            <select name="chart_type">
+                <option value="bar">1. Bar</option>
+                <option value="line">2. Bar</option>
+            </select>
+            <br>
+            <label for="time_series">Choose Time Series: </label>
+            <select name="time_series">
+                <option value="intraday">Intraday</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+            </select>
+            <br>
+            <label for="start_date">Start Date: </label>
+            <input type="date" name="start_date"></input>
+            <br>
+            <label for="end_date">End Date: </label>
+            <input type="date" name="end_date"></input>
+            <br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
