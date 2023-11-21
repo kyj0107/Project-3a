@@ -13,11 +13,16 @@ app.config['SECRET_KEY'] = 'your secret key'
 def generate_chart(symbol, chart_type, time_series, start_date, end_date):
         
         try:
-            
+
             if time_series == 'intraday':
                 interval = '60min'
+                start_date_obj = datetime.strptime('{} 00:00:00'.format(start_date), '%Y-%m-%d %H:%M:%S')
+                end_date_obj = datetime.strptime('{} 00:00:00'.format(end_date), '%Y-%m-%d %H:%M:%S')
+
             else:
                 interval = 'null'
+                start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
+                end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
 
             url = 'https://www.alphavantage.co/query?function=TIME_SERIES_{}&symbol={}&interval={}&apikey=9I22O100RNSZ6IPR'.format(time_series.upper(), symbol, interval)
 
@@ -48,9 +53,12 @@ def generate_chart(symbol, chart_type, time_series, start_date, end_date):
 
             for x in dates:
 
-                x_time_obj = datetime.strptime(x, '%Y-%m-%d')
+                if time_series == 'intraday':
+                    x_time_obj = datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+                else:
+                    x_time_obj = datetime.strptime(x, '%Y-%m-%d')
 
-                if x_time_obj >= start_date and x_time_obj <= end_date:
+                if x_time_obj >= start_date_obj and x_time_obj <= end_date_obj:
                     
                     for item in data[key][x]:
 
@@ -79,7 +87,8 @@ def generate_chart(symbol, chart_type, time_series, start_date, end_date):
                 bar_chart.add('high', high_values)
                 bar_chart.add('low', low_values)
                 bar_chart.add('close', close_values)
-                bar_chart.render_to_file('bar_chart.svg')
+                return bar_chart.render_data_uri()
+
             
             elif chart_type == "line":
 
@@ -90,11 +99,11 @@ def generate_chart(symbol, chart_type, time_series, start_date, end_date):
                 line_chart.add('high', high_values)
                 line_chart.add('low', low_values)
                 line_chart.add('close', close_values)
-                line_chart.render_to_file('line_chart.svg')
+                return line_chart.render_data_uri()
 
-        except:
+        except Exception as error:
 
-            flash('Oops! Something went wrong. Make sure you\'ve filled out all the forms.')
+            flash('Error: {}. Make sure you\'ve filled out all the forms correctly.\nNote: intraday is limited to one day!'.format(error))
 
 @app.route('/', methods=('GET', 'POST'))
 
@@ -109,8 +118,6 @@ def index():
 
     symbols.pop(0)
 
-    # Hmmm...
-
     if request.method == "POST":
         symbol = request.form['symbol']
         chart_type = request.form['chart_type']
@@ -118,18 +125,17 @@ def index():
         start_date = request.form['start_date']
         end_date = request.form['end_date']
 
-        start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
-        end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
-
         if not start_date:
             flash('Start date is required!')
         elif not end_date:
             flash('End date is required!')
-        elif start_date_obj > end_date_obj:
+        elif datetime.strptime(start_date, '%Y-%m-%d') > datetime.strptime(end_date, '%Y-%m-%d'):
             flash('Start date cannot be later than end date!')
         else:
-            generate_chart(symbol, chart_type, time_series, start_date_obj, end_date_obj)
+            chart = generate_chart(symbol, chart_type, time_series, start_date, end_date)
+            return render_template('index.html', symbols=symbols, chart=chart)
+            flash('Chart successfully generated!')
 
     return render_template('index.html', symbols=symbols)
     
-app.run(host="0.0.0.0", port=5001)
+app.run(host="0.0.0.0")
