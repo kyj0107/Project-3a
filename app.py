@@ -10,6 +10,7 @@ app.config["DEBUG"] = True
 
 app.config['SECRET_KEY'] = 'your secret key'
 
+# Code from Project 3, webservice.py, except modified to account for HTML and Flask!
 def generate_chart(symbol, chart_type, time_series, start_date, end_date):
         
         try:
